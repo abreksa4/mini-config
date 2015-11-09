@@ -4,6 +4,8 @@ mini-config takes a list of files and directories, and becomes an ArrayAccess ob
 
 Currently supports JSON, INI, PHP arrays, and XML out of the box.
 
+Documentation is avaialble at: [abreksa4.github.io/mini-config-docs/](abreksa4.github.io/mini-config-docs/)
+
 ## Usage
 
 Here we create a new Config object.        
@@ -33,27 +35,32 @@ $config['database']['password'];
 ```
 
 ## Notes
-One important note is that duplicate key values don't overwrite, they append values. So:
-```
-[
-    'cat1' => [
-        'key1' => 'value1',
-    ]
-]
-```
-and
-```
-[cat1]
-key1=value2
-```
-results in:
-```
-[
-    'cat1' => [
-        'key1' => [
-            'value1',
-            'value2',
+1. If two config files have the same key, the values are merged into an array. So:
+
+    ```
+    [
+        'cat1' => [
+            'key1' => 'value1',
         ]
     ]
-]
-```
+    ```
+    
+    and
+    
+    ```
+    [cat1]
+    key1=value2
+    ```
+    
+    results in:
+    
+    ```
+    [
+        'cat1' => [
+            'key1' => [
+                'value1',
+                'value2',
+            ]
+        ]
+    ]
+    ```
