@@ -8,6 +8,18 @@ Documentation is available at: [http://abreksa4.github.io/mini-config-docs/](htt
 
 mini-config merges the config data recursively. (Meaning that if two sources (files) share keys, the values will be merged as an array as well.)
 
+## Installation
+Add this to your composer.json
+
+```
+{
+    "require": {
+        "abreksa4/mini-config": "0.1.1"
+    }
+}
+```
+
+
 ## Usage
 
 ### Create a new Config instance
