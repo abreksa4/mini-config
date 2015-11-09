@@ -44,20 +44,26 @@ class Config implements ArrayAccess {
     /**
      * Config constructor.
      *
-     * You may pass a boolean true/false if the config data should be used as the parent key for all data in the file.
-     * You may also pass an array of target paths to this constructor to add them to the array to include.
+     * An array of startup options, currently supports the keys 'targets' which should contain an array of targets, and
+     * 'handers' an array of handlers in the format [$extension, $handler].
      *
-     * @param array|null $targets
-     * @internal param bool $groupByFile
+     * @param array $options
      */
-    public function __construct($targets = null) {
-        if ($targets != null) {
-            if (is_array($targets)) {
-                foreach ($targets as $path) {
-                    $this->addTarget($path);
+    public function __construct($options = null) {
+        if (isset($options)) {
+            if (isset($options['targets'])) {
+                if (is_array($options['targets'])) {
+                    foreach ($options['targets'] as $path) {
+                        $this->addTarget($path);
+                    }
+                } else {
+                    $this->addTarget($options['targets']);
                 }
-            } else {
-                $this->addTarget($targets);
+            }
+            if (isset($options['handlers'])) {
+                foreach (array_keys($options['handlers']) as $ext) {
+                    $this->registerHandler($ext, $options['handlers'][$ext]);
+                }
             }
         }
         $this->registerDefaultHandelers();
@@ -84,6 +90,22 @@ class Config implements ArrayAccess {
     }
 
     /**
+     * Register a handler. Takes a file extension to match files by, and a function to process the file and return an array.
+     *
+     * @param string|array $extension
+     * @param callable $handler
+     */
+    public function registerHandler($extension, $handler) {
+        if (is_array($extension)) {
+            foreach ($extension as $ext) {
+                $this->handlers[$ext] = $handler;
+            }
+        } else {
+            $this->handlers[$extension] = $handler;
+        }
+    }
+
+    /**
      * Register the default handlers, 'php', 'xml', 'ini', and 'json'.
      */
     private function registerDefaultHandelers() {
@@ -105,22 +127,6 @@ class Config implements ArrayAccess {
         $this->registerHandler('json', function ($file) {
             return json_decode(file_get_contents($file), true);
         });
-    }
-
-    /**
-     * Register a handler. Takes a file extension to match files by, and a function to process the file and return an array.
-     *
-     * @param string|array $extension
-     * @param callable $handler
-     */
-    public function registerHandler($extension, $handler) {
-        if (is_array($extension)) {
-            foreach ($extension as $ext) {
-                $this->handlers[$ext] = $handler;
-            }
-        } else {
-            $this->handlers[$extension] = $handler;
-        }
     }
 
     /**

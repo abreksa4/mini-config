@@ -6,76 +6,57 @@ Currently supports JSON, INI, PHP arrays, and XML out of the box.
 
 Documentation is avaialble at: [http://abreksa4.github.io/mini-config-docs/](http://abreksa4.github.io/mini-config-docs/)
 
+mini-config merges the config data resursivley. (Meaning that if two sources (files) share keys, the values will be merged as an array as well.)
+
 ## Usage
 
-Here we create a new Config object.        
-We can pass an optional array of targets (directories and file paths) to include
+### Create a new Config instance
+Create a new Config instance, passing in the optional $options array, which currently supports the keys 'targets' which should contain an array of targets, and
+'handers' an array of handlers in the format [$extension, $handler]. 
 ```
-$config = new Config(['config', 'module/config.xml']);
+$config = new Config([
+    'targets' => [
+        'module/config.xml',
+        'config',
+        ]
+    ],
+    'handlers' => array(
+        'yml' => function ($file) { return yaml_parse_file($file); }
+    )
+));
 ```
+At this point the `$config` object is up and running, with the data from the files in `config`,  and in `module/config.xml`.
+(Note, we'd need to have the YAML PHP extension installed to use `yaml_parse`.)
 
-At this point the `$config` object is up and running, with the data from the files in `config` and in `module/config.xml`
-
-Now we're going to add more targets.
+### Add more targets
+We can add more targets by calling `addTarget`.
 As you can see we can either add an array of targets or just one.
 ```
 $config->addTarget('/anothermodule/config');
-$config->addTarget(['config_ini', 'config_yaml']);
+$config->addTarget(['config_ini', '../config/local']);
 ```
 
-Now we'll add a YAML handler. 
-
-Notice we can register an array of extensions to one handler, we can also specify a single extension. Extensions are case-
-sesitive.
-
-(Note, we'd need to have the YAML PHP extension installed)
-
+### Custom hanndlers
+You can register a custom handler for any file extension. For example: 
 ```
-$config->registerHandler(['yaml', 'YAML'], 
+$config->registerHandler(['yml'], 
        function($file){
             return yaml_parse_file($file);
        }
 );
 ```
-    
+
+Notice we can register an array of extensions to one handler, we can also specify a single extension as a string. Extensions are case-
+sesitive.
+
+### Refreshing the config
 Instead of re-scanning and importing all the data everytime we add a target, we call the `refresh()` method to re-import the data:
 ```
 $config->refresh();
 ```
-
+### Data access
 We can access the data by treating the `$config` object as an array, i.e.
 
 ```
 $config['database']['password'];
-```
-
-## Note
-If two config files have the same key, the values are merged into an array. So:
-
-```
-[
-    'cat1' => [
-        'key1' => 'value1',
-    ]
-]
-```
-
-and
-   
-```
-[cat1]
-key1=value2
-```
-
-results in:
-
-```
-[
-    'cat1' => [
-        'key1' => [
-            'value1',
-            'value2',
-        ]
-    ]
-]
 ```
