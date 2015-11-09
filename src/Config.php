@@ -9,7 +9,7 @@ use Closure;
  * Creates an array from the config files in the provided directories.
  *
  * @package Mini\Config
- * @author Andrew Breksa
+ * @author Andrew Breksa (abreksa4@gmail.com)
  */
 class Config implements ArrayAccess {
 
