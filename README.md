@@ -24,7 +24,7 @@ Add this to your composer.json
 
 ### Create a new Config instance
 Create a new Config instance, passing in the optional $options array, which currently supports the keys 'targets' which should contain an array of targets, and
-'handlers' an array of handlers in the format [$extension, $handler]. 
+'handlers' an array of handlers in the format [$extension => $handler]. 
 ```
 $config = new Config([
     'targets' => [
