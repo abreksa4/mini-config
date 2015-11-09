@@ -12,6 +12,12 @@ use ArrayAccess;
 /**
  * Creates an array from a the list of provided php (which return an array) and ini files.
  *
+ * You can access the config values by treating Config as an array, i.e.:
+ *
+ * <code>
+ * $config['cat1']['key1']
+ * </code>
+ *
  * One important note is that duplicate key values don't overwrite, they append values. So:
  * <code>
  * [
@@ -60,10 +66,10 @@ class Config implements ArrayAccess {
      * Config constructor.
      * You may pass a boolean true/false if the config data should be used as the parent key for all data in the file.
      * You may also pass an array of directory paths to this constructor to add them to the array to scan.
-     * @param bool $groupByFile
      * @param array|null $directories
+     * @internal param bool $groupByFile
      */
-    public function __construct($groupByFile = false, $directories = null) {
+    public function __construct($directories = null) {
         if ($directories != null) {
             foreach ($directories as $path) {
                 $this->addDirectory($path);
@@ -112,18 +118,34 @@ class Config implements ArrayAccess {
         }
     }
 
+    /**
+     * @param mixed $offset
+     * @return bool
+     */
     public function offsetExists($offset) {
         return $this->__isset($offset);
     }
 
+    /**
+     * @param $key
+     * @return bool
+     */
     public function __isset($key) {
         return isset($this->config[$key]);
     }
 
+    /**
+     * @param mixed $offset
+     * @return null
+     */
     public function offsetGet($offset) {
         return $this->__get($offset);
     }
 
+    /**
+     * @param $key
+     * @return null
+     */
     public function __get($key) {
         if (isset($this->config[$key])) {
             return $this->config[$key];
@@ -132,6 +154,10 @@ class Config implements ArrayAccess {
         }
     }
 
+    /**
+     * @param $key
+     * @param $value
+     */
     public function __set($key, $value) {
         if ($key === null) {
             $this->config[] = $value;
@@ -140,15 +166,25 @@ class Config implements ArrayAccess {
         }
     }
 
+    /**
+     * @param mixed $offset
+     * @param mixed $data
+     */
     public function offsetSet($offset, $data) {
         $this->__set($offset, $data);
     }
 
 
+    /**
+     * @param mixed $offset
+     */
     public function offsetUnset($offset) {
         unset($this->config[$offset]);
     }
 
+    /**
+     * @param $name
+     */
     public function __unset($name) {
         if (isset($this->config[$name])) {
             unset($this->config[$name]);
