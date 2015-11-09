@@ -6,49 +6,7 @@ use ArrayAccess;
 use Closure;
 
 /**
- * Creates an array from the config files in the provided directories. Handles XML, PHP (return array), INI, and JSON
- * out of the box.
- *
- * Add directories and files to be included by calling <cide>Config->addTarget($string)</code> or
- * <code>Config->addTargets($array)</code>
- *
- * You can register your own extensions and their handlers, by calling
- * <code>Config->registerHandler($extension, $handler)</code> where
- * $extension is the file extension and $handler is a function which takes the file path as a parameter and must return
- * an array.
- *
- * Setting a handler with the extension of an existing handler will overwrite the exising handler with the new one.
- *
- * You can access the config values by treating Config as an array, i.e.:
- *
- * <code>
- * $config['cat1']['key1']
- * </code>
- *
- * One important note is that duplicate key values don't overwrite, they append values. So:
- * <code>
- * [
- *  'cat1' => [
- *      'key1' => 'value1',
- *  ]
- * ]
- * </code>
- * and
- * <code>
- * [cat1]
- * key1=value2
- * </code>
- * results in:
- * <code>
- * [
- *  'cat1' => [
- *      'key1' => [
- *          'value1',
- *          'value2',
- *      ]
- *  ]
- * ]
- * </code>
+ * Creates an array from the config files in the provided directories.
  *
  * @package Mini\Config
  * @author Andrew Breksa
@@ -77,7 +35,7 @@ class Config implements ArrayAccess {
     protected $files = [];
 
     /**
-     * The array of handlers, as 'pattern' => 'Closure'.
+     * The array of handlers, as 'pattern' => 'callable'.
      *
      * @var array
      */
@@ -153,7 +111,7 @@ class Config implements ArrayAccess {
      * Register a handler. Takes a file extension to match files by, and a function to process the file and return an array.
      *
      * @param string|array $extension
-     * @param Closure $handler
+     * @param callable $handler
      */
     public function registerHandler($extension, $handler) {
         if (is_array($extension)) {
