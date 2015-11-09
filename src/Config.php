@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Andrew
- * Date: 2015-11-08
- * Time: 16:10
- */
 
 namespace Mini\Config;
 
@@ -57,6 +51,7 @@ use Closure;
  * </code>
  *
  * @package Mini\Config
+ * @author Andrew Breksa
  */
 class Config implements ArrayAccess {
 
@@ -82,7 +77,7 @@ class Config implements ArrayAccess {
     protected $files = [];
 
     /**
-     * The array of handlers, as 'extension' => 'Closure'.
+     * The array of handlers, as 'pattern' => 'Closure'.
      *
      * @var array
      */
@@ -155,13 +150,19 @@ class Config implements ArrayAccess {
     }
 
     /**
+     * Register a handler. Takes a file extension to match files by, and a function to process the file and return an array.
      *
-     *
-     * @param string $extension
+     * @param string|array $extension
      * @param Closure $handler
      */
     public function registerHandler($extension, $handler) {
-        $this->handlers[$extension] = $handler;
+        if (is_array($extension)) {
+            foreach ($extension as $ext) {
+                $this->handlers[$ext] = $handler;
+            }
+        } else {
+            $this->handlers[$extension] = $handler;
+        }
     }
 
     /**
@@ -170,8 +171,8 @@ class Config implements ArrayAccess {
     public function refresh() {
         $this->config = [];
         foreach ($this->directories as $dir) {
-            foreach ($this->handlers as $handler => $function) {
-                foreach (glob($dir . "/*." . $handler, GLOB_NOSORT) as $file) {
+            foreach ($this->handlers as $ext => $function) {
+                foreach (glob($dir . "/*." . $ext, GLOB_NOSORT) as $file) {
                     $this->config = array_merge_recursive($this->config, $function($file));
                 }
             }
@@ -214,7 +215,7 @@ class Config implements ArrayAccess {
 
     /**
      * @param mixed $offset
-     * @return null
+     * @return mixed
      */
     public function offsetGet($offset) {
         return $this->__get($offset);
@@ -222,7 +223,7 @@ class Config implements ArrayAccess {
 
     /**
      * @param $key
-     * @return null
+     * @return mixed
      */
     public function __get($key) {
         if (isset($this->config[$key])) {

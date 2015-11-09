@@ -20,7 +20,22 @@ Now we're going to add more targets.
 As you can see we can either add an array of targets or just one.
 ```
 $config->addTarget('/anothermodule/config');
-$config->addTarget(['config_ini', 'json']);
+$config->addTarget(['config_ini', 'config_yaml']);
+```
+
+Now we'll add a YAML handler. 
+
+Notice we can register an array of extensions to one handler, we can also specify a single extension. Extensions are case-
+sesitive.
+
+(Note, we'd need to have the YAML PHP extension installed)
+
+```
+$config->registerHandler(['yaml', 'YAML'], 
+       function($file){
+            return yaml_parse_file($file);
+       }
+);
 ```
     
 Instead of re-scanning and importing all the data everytime we add a target, we call the `refresh()` method to re-import the data:
@@ -28,39 +43,39 @@ Instead of re-scanning and importing all the data everytime we add a target, we 
 $config->refresh();
 ```
 
-We can access the data by treating the $config object as an array, i.e.
+We can access the data by treating the `$config` object as an array, i.e.
 
 ```
 $config['database']['password'];
 ```
 
-## Notes
-1. If two config files have the same key, the values are merged into an array. So:
+## Note
+If two config files have the same key, the values are merged into an array. So:
 
-    ```
-    [
-        'cat1' => [
-            'key1' => 'value1',
+```
+[
+    'cat1' => [
+        'key1' => 'value1',
+    ]
+]
+```
+
+and
+   
+```
+[cat1]
+key1=value2
+```
+
+results in:
+
+```
+[
+    'cat1' => [
+        'key1' => [
+            'value1',
+            'value2',
         ]
     ]
-    ```
-    
-    and
-    
-    ```
-    [cat1]
-    key1=value2
-    ```
-    
-    results in:
-    
-    ```
-    [
-        'cat1' => [
-            'key1' => [
-                'value1',
-                'value2',
-            ]
-        ]
-    ]
-    ```
+]
+```
