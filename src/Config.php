@@ -7,10 +7,19 @@
  */
 
 namespace Mini\Config;
+
 use ArrayAccess;
+use Closure;
 
 /**
- * Creates an array from a the list of provided php (which return an array) and ini files.
+ * Creates an array from the config files in the provided directories. Handles XML, PHP (return array), INI, and JSON out of the box.
+ *
+ * Add directories and files to be included by calling <cide>Config->addTarget($string)</code> or <code>Config->addTargets($array)</code>
+ *
+ * You can register your own extensions and their handlers, by calling <code>Config->registerHandler($extension, $handler)</code> where
+ * $extension is the file extension and $handler is a function which takes the file path as a parameter and must return an array.
+ *
+ * Setting a handler with the extension of an existing handler will overwrite the exising handler with the new one.
  *
  * You can access the config values by treating Config as an array, i.e.:
  *
@@ -55,66 +64,138 @@ class Config implements ArrayAccess {
     protected $config;
 
     /**
-     * The array of directories for Config to scan to build the config array.
+     * The array of targets for Config to include in the the config array.
      *
      * @var array
      */
-    protected $dirs;
+    protected $directories;
 
+    /**
+     * The array of files for Config to include in the the config array.
+     *
+     * @var array
+     */
+    protected $files;
+
+    /**
+     * The array of handlers, as 'extension' => 'Closure'.
+     *
+     * @var array
+     */
+    protected $handlers;
 
     /**
      * Config constructor.
+     *
      * You may pass a boolean true/false if the config data should be used as the parent key for all data in the file.
-     * You may also pass an array of directory paths to this constructor to add them to the array to scan.
-     * @param array|null $directories
+     * You may also pass an array of target paths to this constructor to add them to the array to include.
+     *
+     * @param array|null $targets
      * @internal param bool $groupByFile
      */
-    public function __construct($directories = null) {
-        if ($directories != null) {
-            foreach ($directories as $path) {
-                $this->addDirectory($path);
+    public function __construct($targets = null) {
+        if ($targets != null) {
+            if (is_array($targets)) {
+                foreach ($targets as $path) {
+                    $this->addTarget($path);
+                }
+            } else {
+                $this->addTarget($targets);
             }
         }
+        $this->registerDefaultHandelers();
         $this->refresh();
     }
 
     /**
-     * Adds a path to the directory listing to scan.
+     * Adds a target to the target listing to include.
      *
      * @param string $path
      */
-    public function addDirectory($path) {
+    public function addTarget($path) {
         if (is_dir($path)) {
-            $this->dirs[] = rtrim($path, '/');
+            $this->directories[] = rtrim($path, '/');
+        } elseif (is_file($path)) {
+            $this->files[] = $path;
         }
+    }
+
+    /**
+     * Register the default handlers, 'php', 'xml', 'ini', and 'json'.
+     */
+    private function registerDefaultHandelers() {
+        $this->registerHandler('xml', function ($file) {
+            $xml2array = function ($xmlObject, $out = array()) use (&$xml2array) {
+                foreach ((array)$xmlObject as $index => $node) {
+                    $out[$index] = (is_object($node)) ? $xml2array($node) : $node;
+                }
+                return $out;
+            };
+            return $xml2array(simplexml_load_string(file_get_contents($file)));
+        });
+        $this->registerHandler('php', function ($file) {
+            return include($file);
+        });
+        $this->registerHandler('ini', function ($file) {
+            return parse_ini_file($file, true);
+        });
+        $this->registerHandler('json', function ($file) {
+            return json_decode(file_get_contents($file), true);
+        });
+    }
+
+    /**
+     *
+     *
+     * @param string $extension
+     * @param Closure $handler
+     */
+    public function registerHandler($extension, $handler) {
+        $this->handlers[$extension] = $handler;
     }
 
     /**
      * Build the config array, call this after adding config directories after the constructor.
      */
     public function refresh() {
-        if (empty($this->dirs)) {
+        if (empty($this->directories)) {
             return;
         }
         $this->config = [];
-        foreach ($this->dirs as $dir) {
-            foreach (glob($dir . '/*.php') as $file) {
-                $this->config = array_merge_recursive($this->config, include($file));
+        foreach ($this->directories as $dir) {
+            foreach ($this->handlers as $handler => $function) {
+                foreach (glob($dir . "/*." . $handler, GLOB_NOSORT) as $file) {
+                    $this->config = array_merge_recursive($this->config, $function($file));
+                }
             }
-            foreach (glob($dir . '/*.ini') as $file) {
-                $this->config = array_merge_recursive($this->config, parse_ini_file($file, true));
+        }
+        foreach ($this->files as $file) {
+            $pathinfo = pathinfo($file);
+            if (isset($pathinfo['extension'])) {
+                if (in_array($pathinfo['extension'], array_keys($this->handlers))) {
+                    $this->config = array_merge_recursive($this->config, $this->handlers[$pathinfo['extension']]($file));
+                }
             }
         }
     }
 
     /**
-     * Add an array of directories to the scan list.
+     * Removes a handler from the internal handler array, stopping the parsing of files with that extension.
      *
-     * @param array $dirs
+     * @param string $extension
      */
-    public function addDirectories($dirs) {
-        foreach ($dirs as $dir) {
-            $this->addDirectory($dir);
+    public function removeHandler($extension) {
+        unset($this->handlers[$extension]);
+    }
+
+    /**
+     * Add an array of targets to the scan list.
+     *
+     * @param array $targets
+     */
+    public function addTargets($targets) {
+        foreach ($targets as $target) {
+            $this->addTarget($target);
         }
     }
 
@@ -173,7 +254,6 @@ class Config implements ArrayAccess {
     public function offsetSet($offset, $data) {
         $this->__set($offset, $data);
     }
-
 
     /**
      * @param mixed $offset
