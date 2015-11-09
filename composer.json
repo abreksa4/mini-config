@@ -1,0 +1,12 @@
+{
+  "name": "Andrew Breksa/mini-config",
+  "description": "A mini config library",
+  "minimum-stability": "dev",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Andrew Breksa",
+      "email": "abreksa4@gmail.com"
+    }
+  ]
+}
