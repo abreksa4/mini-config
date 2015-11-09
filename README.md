@@ -4,15 +4,15 @@ mini-config takes a list of files and directories, and becomes an ArrayAccess ob
 
 Currently supports JSON, INI, PHP arrays, and XML out of the box.
 
-Documentation is avaialble at: [http://abreksa4.github.io/mini-config-docs/](http://abreksa4.github.io/mini-config-docs/)
+Documentation is available at: [http://abreksa4.github.io/mini-config-docs/](http://abreksa4.github.io/mini-config-docs/)
 
-mini-config merges the config data resursivley. (Meaning that if two sources (files) share keys, the values will be merged as an array as well.)
+mini-config merges the config data recursively. (Meaning that if two sources (files) share keys, the values will be merged as an array as well.)
 
 ## Usage
 
 ### Create a new Config instance
 Create a new Config instance, passing in the optional $options array, which currently supports the keys 'targets' which should contain an array of targets, and
-'handers' an array of handlers in the format [$extension, $handler]. 
+'handlers' an array of handlers in the format [$extension, $handler]. 
 ```
 $config = new Config([
     'targets' => [
@@ -36,7 +36,7 @@ $config->addTarget('/anothermodule/config');
 $config->addTarget(['config_ini', '../config/local']);
 ```
 
-### Custom hanndlers
+### Custom handlers
 You can register a custom handler for any file extension. For example: 
 ```
 $config->registerHandler(['yml'], 
@@ -46,11 +46,10 @@ $config->registerHandler(['yml'],
 );
 ```
 
-Notice we can register an array of extensions to one handler, we can also specify a single extension as a string. Extensions are case-
-sesitive.
+Notice we can register an array of extensions to one handler, we can also specify a single extension as a string. Extensions are case-sensitive.
 
 ### Refreshing the config
-Instead of re-scanning and importing all the data everytime we add a target, we call the `refresh()` method to re-import the data:
+Instead of re-scanning and importing all the data every time we add a target, we call the `refresh()` method to re-import the data:
 ```
 $config->refresh();
 ```

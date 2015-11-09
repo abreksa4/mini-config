@@ -3,7 +3,6 @@
 namespace Mini\Config;
 
 use ArrayAccess;
-use Closure;
 
 /**
  * Creates an array from the config files in the provided directories.
@@ -45,7 +44,7 @@ class Config implements ArrayAccess {
      * Config constructor.
      *
      * An array of startup options, currently supports the keys 'targets' which should contain an array of targets, and
-     * 'handers' an array of handlers in the format [$extension, $handler].
+     * 'handlers' an array of handlers in the format [$extension, $handler].
      *
      * @param array $options
      */
@@ -66,7 +65,7 @@ class Config implements ArrayAccess {
                 }
             }
         }
-        $this->registerDefaultHandelers();
+        $this->registerDefaultHandlers();
         $this->refresh();
     }
 
@@ -108,7 +107,7 @@ class Config implements ArrayAccess {
     /**
      * Register the default handlers, 'php', 'xml', 'ini', and 'json'.
      */
-    private function registerDefaultHandelers() {
+    private function registerDefaultHandlers() {
         $this->registerHandler('xml', function ($file) {
             $xml2array = function ($xmlObject, $out = array()) use (&$xml2array) {
                 foreach ((array)$xmlObject as $index => $node) {
@@ -119,7 +118,11 @@ class Config implements ArrayAccess {
             return $xml2array(simplexml_load_string(file_get_contents($file)));
         });
         $this->registerHandler('php', function ($file) {
-            return include($file);
+            $data = include($file);
+            if ($data != null && is_array($data)) {
+                return $data;
+            }
+            return;
         });
         $this->registerHandler('ini', function ($file) {
             return parse_ini_file($file, true);
