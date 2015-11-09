@@ -1,7 +1,7 @@
 {
   "name": "Andrew Breksa/mini-config",
   "description": "A mini config library",
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "license": "proprietary",
   "authors": [
     {

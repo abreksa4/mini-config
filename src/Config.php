@@ -12,12 +12,16 @@ use ArrayAccess;
 use Closure;
 
 /**
- * Creates an array from the config files in the provided directories. Handles XML, PHP (return array), INI, and JSON out of the box.
+ * Creates an array from the config files in the provided directories. Handles XML, PHP (return array), INI, and JSON
+ * out of the box.
  *
- * Add directories and files to be included by calling <cide>Config->addTarget($string)</code> or <code>Config->addTargets($array)</code>
+ * Add directories and files to be included by calling <cide>Config->addTarget($string)</code> or
+ * <code>Config->addTargets($array)</code>
  *
- * You can register your own extensions and their handlers, by calling <code>Config->registerHandler($extension, $handler)</code> where
- * $extension is the file extension and $handler is a function which takes the file path as a parameter and must return an array.
+ * You can register your own extensions and their handlers, by calling
+ * <code>Config->registerHandler($extension, $handler)</code> where
+ * $extension is the file extension and $handler is a function which takes the file path as a parameter and must return
+ * an array.
  *
  * Setting a handler with the extension of an existing handler will overwrite the exising handler with the new one.
  *
@@ -68,14 +72,14 @@ class Config implements ArrayAccess {
      *
      * @var array
      */
-    protected $directories;
+    protected $directories = [];
 
     /**
      * The array of files for Config to include in the the config array.
      *
      * @var array
      */
-    protected $files;
+    protected $files = [];
 
     /**
      * The array of handlers, as 'extension' => 'Closure'.
@@ -110,13 +114,19 @@ class Config implements ArrayAccess {
     /**
      * Adds a target to the target listing to include.
      *
-     * @param string $path
+     * @param string|array $target
      */
-    public function addTarget($path) {
-        if (is_dir($path)) {
-            $this->directories[] = rtrim($path, '/');
-        } elseif (is_file($path)) {
-            $this->files[] = $path;
+    public function addTarget($target) {
+        if (is_array($target)) {
+            foreach ($target as $p) {
+                $this->addTarget($p);
+            }
+            return;
+        }
+        if (is_dir($target)) {
+            $this->directories[] = rtrim($target, '/');
+        } elseif (is_file($target)) {
+            $this->files[] = $target;
         }
     }
 
@@ -158,9 +168,6 @@ class Config implements ArrayAccess {
      * Build the config array, call this after adding config directories after the constructor.
      */
     public function refresh() {
-        if (empty($this->directories)) {
-            return;
-        }
         $this->config = [];
         foreach ($this->directories as $dir) {
             foreach ($this->handlers as $handler => $function) {
@@ -172,8 +179,9 @@ class Config implements ArrayAccess {
         foreach ($this->files as $file) {
             $pathinfo = pathinfo($file);
             if (isset($pathinfo['extension'])) {
-                if (in_array($pathinfo['extension'], array_keys($this->handlers))) {
-                    $this->config = array_merge_recursive($this->config, $this->handlers[$pathinfo['extension']]($file));
+                $ext = $pathinfo['extension'];
+                if (in_array($ext, array_keys($this->handlers))) {
+                    $this->config = array_merge_recursive($this->config, $this->handlers[$ext]($file));
                 }
             }
         }
@@ -186,17 +194,6 @@ class Config implements ArrayAccess {
      */
     public function removeHandler($extension) {
         unset($this->handlers[$extension]);
-    }
-
-    /**
-     * Add an array of targets to the scan list.
-     *
-     * @param array $targets
-     */
-    public function addTargets($targets) {
-        foreach ($targets as $target) {
-            $this->addTarget($target);
-        }
     }
 
     /**
