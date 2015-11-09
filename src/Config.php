@@ -3,6 +3,7 @@
 namespace Mini\Config;
 
 use ArrayAccess;
+use JsonSerializable;
 
 /**
  * Creates an array from the config files in the provided directories.
@@ -10,7 +11,7 @@ use ArrayAccess;
  * @package Mini\Config
  * @author Andrew Breksa (abreksa4@gmail.com)
  */
-class Config implements ArrayAccess {
+class Config implements ArrayAccess, JsonSerializable {
 
     /**
      * The config array, holds the config from all merged config files.
@@ -236,4 +237,14 @@ class Config implements ArrayAccess {
         }
     }
 
+    /**
+     * Specify data which should be serialized to JSON
+     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    function jsonSerialize() {
+        return $this->config;
+    }
 }

@@ -1,12 +1,17 @@
 {
   "name": "abreksa4/mini-config",
   "description": "A mini config library",
-  "minimum-stability": "stable",
+  "minimum-stability": "dev",
   "license": "proprietary",
   "authors": [
     {
       "name": "Andrew Breksa",
       "email": "abreksa4@gmail.com"
     }
-  ]
+  ],
+  "autoload": {
+    "psr-4": {
+      "Mini\\Config": "src"
+    }
+  }
 }
