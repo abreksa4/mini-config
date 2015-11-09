@@ -35,7 +35,7 @@ class Config implements ArrayAccess {
     protected $files = [];
 
     /**
-     * The array of handlers, as 'pattern' => 'callable'.
+     * The array of handlers, as 'extension' => 'callable'.
      *
      * @var array
      */
