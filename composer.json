@@ -11,7 +11,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "Mini\\Config": "src"
+      "Mini\\Config\\Config": "src"
     }
   }
 }
