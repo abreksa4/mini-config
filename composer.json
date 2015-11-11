@@ -10,8 +10,8 @@
     }
   ],
   "autoload": {
-    "psr-4": {
-      "files":["src/Config.php"]
-    }
+    "files": [
+      "src/Config.php"
+    ]
   }
 }
