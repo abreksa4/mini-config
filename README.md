@@ -2,7 +2,17 @@
 
 mini-config takes a list of files and directories, and becomes an ArrayAccess object with the parsed config data. 
 
-Currently supports JSON, INI, PHP arrays, and XML out of the box.
+Currently supports JSON, INI, PHP arrays, and XML* out of the box.
+
+**XML must be in the format, though you can register a custom XML parser to override this:*
+```
+<root>
+    <key>value</key>
+    <cat>
+        <key>value</key>
+    </cat>
+</root>
+```
 
 Documentation is available at: [http://abreksa4.github.io/mini-config-docs/](http://abreksa4.github.io/mini-config-docs/)
 

@@ -156,6 +156,16 @@ class Config implements ArrayAccess, JsonSerializable {
         }
     }
 
+
+    /**
+     * Merges the provided array and config array into the config array
+     *
+     * @param array $config
+     */
+    public function merge(array $config) {
+        $this->config = array_merge_recursive($this->config, $config);
+    }
+
     /**
      * Removes a handler from the internal handler array, stopping the parsing of files with that extension.
      *
