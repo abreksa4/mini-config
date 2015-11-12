@@ -4,7 +4,7 @@ mini-config takes a list of files and directories, and becomes an ArrayAccess ob
 
 Currently supports JSON, INI, PHP arrays, and XML* out of the box.
 
-**XML must be in the format, though you can register a custom XML parser to override this:*
+**XML must be in the following format, though you can register a custom XML parser to override this:*
 ```
 <root>
     <key>value</key>
@@ -69,6 +69,15 @@ $config->registerHandler(['yml'],
 ```
 
 Notice we can register an array of extensions to one handler, we can also specify a single extension as a string. Extensions are case-sensitive.
+
+### Merge config array with array
+```
+$config->merge([
+    'database'=> [
+        'password' => 'password';
+    ]
+]);
+```
 
 ### Refreshing the config
 Instead of re-scanning and importing all the data every time we add a target, we call the `refresh()` method to re-import the data:
