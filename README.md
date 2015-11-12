@@ -2,9 +2,22 @@
 
 mini-config takes a list of files and directories, and becomes an ArrayAccess object with the parsed config data. 
 
-Currently supports JSON, INI, PHP arrays, and XML* out of the box.
+Currently supports JSON, INI, PHP arrays, and XML** out of the box.
 
-**XML must be in the following format, though you can register a custom XML parser to override this:*
+**JSON must be in the following format, though you can register a custom JSON parser to override this:*
+```
+{
+  "cat1": {
+    "key1": "value1",
+    "key2: "value2"
+  },
+  "cat2": {
+    "key1": 0
+  }
+}
+```
+
+***XML must be in the following format, though you can register a custom XML parser to override this:*
 ```
 <root>
     <key>value</key>
@@ -24,7 +37,7 @@ Add this to your composer.json
 ```
 {
     "require": {
-        "abreksa4/mini-config": "0.1"
+        "abreksa4/mini-config": "v0.2"
     }
 }
 ```
@@ -70,11 +83,11 @@ $config->registerHandler(['yml'],
 
 Notice we can register an array of extensions to one handler, we can also specify a single extension as a string. Extensions are case-sensitive.
 
-### Merge config array with array
+### Merge array into config
 ```
 $config->merge([
-    'database'=> [
-        'password' => 'password';
+    'cat3'=> [
+        'key1' => 'value1';
     ]
 ]);
 ```

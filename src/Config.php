@@ -11,7 +11,7 @@ use JsonSerializable;
  * @package Mini\Config
  * @author Andrew Breksa (abreksa4@gmail.com)
  */
-class Config implements ArrayAccess, JsonSerializable {
+class Config implements ArrayAccess, JsonSerializable, \Serializable {
 
     /**
      * The config array, holds the config from all merged config files.
@@ -90,7 +90,8 @@ class Config implements ArrayAccess, JsonSerializable {
     }
 
     /**
-     * Register a handler. Takes a file extension to match files by, and a function to process the file and return an array.
+     * Register a handler. Takes a file extension to match files by, and a function to process the file and return an
+     * array.
      *
      * @param string|array $extension
      * @param callable $handler
@@ -155,7 +156,6 @@ class Config implements ArrayAccess, JsonSerializable {
             }
         }
     }
-
 
     /**
      * Merges the provided array and config array into the config array
@@ -248,6 +248,16 @@ class Config implements ArrayAccess, JsonSerializable {
     }
 
     /**
+     * String representation of object
+     * @link http://php.net/manual/en/serializable.serialize.php
+     * @return string the string representation of the object or null
+     * @since 5.1.0
+     */
+    public function serialize() {
+        return $this->jsonSerialize();
+    }
+
+    /**
      * Specify data which should be serialized to JSON
      * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
      * @return mixed data which can be serialized by <b>json_encode</b>,
@@ -257,4 +267,72 @@ class Config implements ArrayAccess, JsonSerializable {
     function jsonSerialize() {
         return $this->config;
     }
+
+    /**
+     * Constructs the object
+     * @link http://php.net/manual/en/serializable.unserialize.php
+     * @param string $serialized <p>
+     * The string representation of the object.
+     * </p>
+     * @return void
+     * @since 5.1.0
+     */
+    public function unserialize($serialized) {
+        $this->config = json_decode($serialized, true);
+    }
+}
+
+/**
+ * Utils class for Mini\Config
+ * @package Mini\Config
+ * @author Andrew Breksa (abreksa4@gmail.com)
+ */
+class Utils {
+    /**
+     * Merges two arrays, and returns the result. Takes an optional $overwrite parameter to overwrite string value with
+     * those in the second array, i.e.:
+     * <code>
+     * $this->_merge([
+     *     'database'=>[
+     *         'password' => 'toor'
+     *     ]],[
+     *     'database'=>[
+     *         'password' => 'password'
+     * ]], true);
+     * </code>
+     *
+     * Will result in:
+     * <code>
+     * [
+     *     'database' => [
+     *         'password' => 'password
+     *     ]
+     * ]
+     * </code>
+     *
+     * @param array $array1
+     * @param array $array2
+     * @param bool|false $overwrite
+     * @return array
+     */
+    public static function merge($array1, $array2, $overwrite = false) {
+        $array = $array1;
+        foreach (array_keys($array2) as $key) {
+            if (!isset($array1[$key])) {
+                $array[$key] = $array2[$key];
+                continue;
+            }
+            if (is_array($array1[$key])) {
+                $array[$key] = self::Merge($array1[$key], $array2[$key], $overwrite);
+                continue;
+            }
+            if ($overwrite) {
+                $array[$key] = $array2[$key];
+            } else {
+                $array[$key] = [$array[$key], $array2[$key]];
+            }
+        }
+        return $array;
+    }
+
 }
