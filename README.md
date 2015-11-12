@@ -37,7 +37,7 @@ Add this to your composer.json
 ```
 {
     "require": {
-        "abreksa4/mini-config": "v0.2"
+        "abreksa4/mini-config": "0.2"
     }
 }
 ```
