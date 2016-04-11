@@ -2,7 +2,7 @@
   "name": "abreksa4/mini-config",
   "description": "A mini config library",
   "minimum-stability": "dev",
-  "license": "proprietary",
+  "license": "GPL-2.0",
   "authors": [
     {
       "name": "Andrew Breksa",
